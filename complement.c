@@ -104,6 +104,7 @@ bfun* complement (bfun* b_initial) {
     del_bfun(nc);
 
     // and_var modifies the passed cube_list
+    printf("Merging cofactors on %d\n", x);
     and_var(p, x);
     and_var(n, x * -1);
 
@@ -192,7 +193,7 @@ bool has_all_dc(bfun* b) {
 cube_list* negate_cube(cube* c, int var) {
   cube_list* result = new_cube_list(var);
 
-  for (int i = 0; i < var; i++) {
+  for (int i = 1; i <= var; i++) {
     val value = c->values[i];
 
     if (value == t) {
@@ -223,7 +224,7 @@ bfun* try_simplify(bfun* b) {
     result = new_cube_list(b->var_count); 
     print_bfun(result);
   } else if (b->cube_count == 1) { // just one cube -> negate manually
-    printf("Base case - single cubelist:");
+    printf("Base case - single cube:");
     result = negate_cube(b->begin, b->var_count);
     print_bfun(result);
   }
@@ -234,10 +235,6 @@ bfun* try_simplify(bfun* b) {
 
 
 void and_var(bfun* b, int var) {
-  if (b->begin == NULL) {
-    add_cube(b, new_cube(b->var_count));
-  }
-
   for (cube* c = b->begin; c != NULL; c = c->next) {
     insert_var (c, var);
   }
