@@ -1,5 +1,3 @@
-#include <string.h>
-
 #include "cubelist.h"
 
 
@@ -36,10 +34,15 @@ void del_cube(cube* c, int vars) {
   free(c);
 }
 
-cube* copy(cube* c) {
-  cube* new_c = Malloc(sizeof(cube));
-  memcpy(new_c, c, sizeof(cube));
+cube* copy(cube* c, int v) {
+  cube* new_c = new_cube(v);
+
+  for (int i = 0; i <= v; i++) {
+    new_c->values[i] = c->values[i];
+  }
+  new_c->dc_count = c->dc_count;
   new_c->next = NULL;
+
   return new_c;
 }
 

@@ -24,7 +24,7 @@ void* Malloc(int size);
 // cube functions
 cube* new_cube(int vars);
 void del_cube(cube* c, int vars);
-cube* copy(cube* c);
+cube* copy(cube* c, int vars);
 void remove_var (cube* c, int var);
 void insert_var (cube* c, int var);
 void set_false (cube* c, int var);

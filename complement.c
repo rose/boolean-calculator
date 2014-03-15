@@ -37,24 +37,27 @@ int main(int argc, char* argv[]) {
 
   /*
   cube* plain = new_cube(vs);
-  cube* one_true = new_cube(vs);
-  set_true(one_true, 1);
   cube* one_false = new_cube(vs);
   set_false(one_false, 1);
   */
+  cube* one_true = new_cube(vs);
+  set_true(one_true, 1);
   cube* one_each = new_cube(vs);
   set_false(one_each, 1);
   set_true(one_each, 2);
 
   cube_list* test1 = new_cube_list(vs);
   add_cube(test1, one_each);
+  add_cube(test1, one_true);
 
   printf("\nComplementing...\n");
   print_bfun(test1);
 
   bfun* result = complement(test1);
+  printf("\n************************************\n");
   printf("\nResult is:\n");
   print_bfun(result);
+  printf("\n************************************\n");
 
   del_bfun(test1);
   del_bfun(result);
@@ -63,27 +66,32 @@ int main(int argc, char* argv[]) {
   del_cube(one_true, vs);
   del_cube(one_false, vs);
   del_cube(one_each, vs);
+  */
 
   bfun* b = readFile(filename);
   bfun* cb = complement(b);
   
+  printf("\n************************************\n");
+  printf("\nResult is:\n");
+  print_bfun(cb);
+  printf("\n************************************\n");
+
+  del_bfun(b);
   del_bfun(cb);
-  */
 }
 
 
 bfun* complement (bfun* b_initial) {
   // does not free argument.  
 
-  printf("Complement %p\n", b_initial);
+  printf("Complement", b_initial);
   print_bfun(b_initial);
 
   bfun* b = try_simplify(b_initial);
   if (b_initial != b) {
-    printf("Complement returning simplified:\n");
-    print_bfun(b);
     return b;
   } else {
+    printf("Recursing...\n");
     int x = best_split(b);
 
     bfun* pc = pos_co(b,x);
@@ -95,13 +103,13 @@ bfun* complement (bfun* b_initial) {
     del_bfun(pc);
     del_bfun(nc);
 
-    // and_var modifies the passed cube
+    // and_var modifies the passed cube_list
     and_var(p, x);
     and_var(n, x * -1);
 
     // or allocates a new cube & copies the cubelists over
     bfun* result = or(p,n);
-    printf("Complement returning merged:\n");
+    printf("Complement returning merged:");
     print_bfun(result);
     del_bfun(p);
     del_bfun(n);
@@ -116,6 +124,9 @@ bfun* pos_co (bfun* b, int v) {
   // using no_dup makes the runtime quadratic!  But may substantially reduce
   // the number of cubes in each sublist.  TODO time this
 
+  printf("Positive cofactor on %d of ", v);
+  print_bfun(b);
+
   bfun* result = new_bfun(b->var_count);
 
   for (cube* c = b->begin; c != NULL; c = c->next) {
@@ -123,16 +134,19 @@ bfun* pos_co (bfun* b, int v) {
 
     switch (c->values[v]) {
       case dc:
-        co_cube = copy(c);
+        co_cube = copy(c, b->var_count);
         add_cube_no_dup(result, co_cube);
         break;
       case t:
-        co_cube = copy(c);
+        co_cube = copy(c, b->var_count);
         set_dc(co_cube, v);
         add_cube_no_dup(result, co_cube);
         break;
     }
   }
+
+  printf("  is");
+  print_bfun(result);
 
   return result;
 }
@@ -141,22 +155,28 @@ bfun* pos_co (bfun* b, int v) {
 bfun* neg_co (bfun* b, int v) {
   bfun* result = new_bfun(b->var_count);
 
+  printf("Negative cofactor on %d of ", v);
+  print_bfun(b);
+
   for (cube* c = b->begin; c != NULL; c = c->next) {
     cube* co_cube = NULL;
 
     switch (c->values[v]) {
       case dc:
-        co_cube = copy(c);
+        co_cube = copy(c, b->var_count);
         add_cube_no_dup(result, co_cube);
         break;
       case f:
-        co_cube = copy(c);
+        co_cube = copy(c, b->var_count);
         set_dc(co_cube, v);
         add_cube_no_dup(result, co_cube);
         break;
     }
   }
   
+  printf("  is");
+  print_bfun(result);
+
   return result;
 }
 
@@ -194,16 +214,16 @@ bfun* try_simplify(bfun* b) {
   bfun* result = NULL;
 
   if (b->cube_count == 0) { // empty cubelist is never true -> change to true bfun
-    printf("Simplify returning empty cube_list \n");
+    printf("Base case - empty cube list returns true:");
     result = new_cube_list(b->var_count);
     add_cube(result, new_cube(b->var_count));
     print_bfun(result);
   } else if (has_all_dc(b)) { // always true -> change to empty (false) bfun
-    printf("Simplify returning true cube_list \n");
+    printf("Base case - true cube list returns empty:");
     result = new_cube_list(b->var_count); 
     print_bfun(result);
   } else if (b->cube_count == 1) { // just one cube -> negate manually
-    printf("Simplify returning single element cube_list \n");
+    printf("Base case - single cubelist:");
     result = negate_cube(b->begin, b->var_count);
     print_bfun(result);
   }
@@ -214,6 +234,10 @@ bfun* try_simplify(bfun* b) {
 
 
 void and_var(bfun* b, int var) {
+  if (b->begin == NULL) {
+    add_cube(b, new_cube(b->var_count));
+  }
+
   for (cube* c = b->begin; c != NULL; c = c->next) {
     insert_var (c, var);
   }
@@ -230,7 +254,7 @@ bfun* or(bfun* b, bfun* g) {
 
 void append_cubes(bfun* b, bfun* g) {
   for (cube* c = g->begin; c != NULL; c = c->next) {
-    add_cube(b, copy(c));
+    add_cube(b, copy(c, b->var_count));
   }
 }
 
@@ -240,7 +264,7 @@ bool var_stats(bfun* b, int* count, int* diff, int* is_binate) {
 
   bool found_binate = false;
 
-  for ( int i = 1; i < b->var_count; i++ ) {
+  for ( int i = 0; i <= b->var_count; i++ ) {
     is_binate[i] = false;
     count[i] = 0;
     diff[i] = 0;
@@ -256,8 +280,7 @@ bool var_stats(bfun* b, int* count, int* diff, int* is_binate) {
           found_binate = true;
         }
         diff[i] ++;
-      }
-      if (c->values[i] == f) {
+      } else if (c->values[i] == f) {
         count[i]++;
         if (diff[i] > 0) {
           is_binate[i] = true;
@@ -265,8 +288,11 @@ bool var_stats(bfun* b, int* count, int* diff, int* is_binate) {
         }
         diff[i]--;
       }
+      
     }
   }
+
+  return found_binate;
 }
 
 
@@ -278,9 +304,9 @@ int best_split(bfun* b) {
   // TODO surely this can be unyuckified a bit
 
   // remember that 0 is not a valid variable
-  int* count = Malloc(sizeof(int) * b->var_count + 1);
-  int* diff = Malloc(sizeof(int) * b->var_count + 1);
-  int* is_binate = Malloc(sizeof(int) * b->var_count + 1);
+  int* count = Malloc(sizeof(int) * (b->var_count + 1));
+  int* diff = Malloc(sizeof(int) * (b->var_count + 1));
+  int* is_binate = Malloc(sizeof(int) * (b->var_count + 1));
 
   // fill arrays with information from b
   bool binate_exists = var_stats(b, count, diff, is_binate);
