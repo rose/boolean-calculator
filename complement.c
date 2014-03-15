@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
   char* filename;
   if (argc > 1) filename = argv[1];
   else filename = "foo";
+  char* out_file = "out.txt";
 
   int vs = 4;
 
@@ -68,13 +69,15 @@ int main(int argc, char* argv[]) {
   del_cube(one_each, vs);
   */
 
-  bfun* b = readFile(filename);
+  bfun* b = read_file(filename);
   bfun* cb = complement(b);
   
   printf("\n************************************\n");
   printf("\nResult is:\n");
   print_bfun(cb);
   printf("\n************************************\n");
+
+  write_file(out_file, cb);
 
   del_bfun(b);
   del_bfun(cb);

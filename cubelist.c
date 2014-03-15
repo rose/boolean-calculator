@@ -196,8 +196,13 @@ bfun* invert_cube(cube* c, int var_count) { // yuck
   return foo;
 }
 
-bfun* readFile(char* filename) {
+bfun* read_file(char* filename) {
   FILE *fp = fopen(filename, "r");
+  if (fp == NULL) {
+    printf("Error opening file %s\n", filename);
+    exit(1);
+  }
+
   int var_count = 0;
   int cube_count = 0;
 
@@ -245,6 +250,28 @@ bfun* readFile(char* filename) {
   fclose(fp);
   return (bfun*) cl;
 }
+
+
+void write_file(char* name, bfun* b) {
+  FILE *fp = fopen(name, "w");
+
+  fprintf(fp, "%d\n%d\n", b->var_count, b->cube_count);
+  for (cube* c = b->begin; c != NULL; c = c->next) {
+    fprintf(fp, "%d ", b->var_count - c->dc_count);
+    for (int i = 1; i <= b->var_count; i++) {
+      switch (c->values[i]) {
+        case t:
+          fprintf(fp, "%d ", i);
+          break;
+        case f:
+          fprintf(fp, "-%d ", i);
+          break;
+      }
+    }
+    fprintf(fp, "\n");
+  }
+}
+
 
 void print_bfun(bfun* foo) {
   printf("  %p: ", foo);
