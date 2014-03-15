@@ -27,9 +27,11 @@ cube* new_cube(int vars) {
 }
 
 void del_cube(cube* c, int vars) {
+#ifdef DEBUG
   printf("  deleting cube %p ", c);
   print_cube(c, vars);
   printf("\n");
+#endif
   free(c->values);
   free(c);
 }
@@ -112,14 +114,18 @@ cube_list* new_cube_list(int var_count) {
 }
 
 void del_cube_list(cube_list* cl) {
+#ifdef DEBUG
   printf("Deleting cube_list at %p\n", cl);
   print_bfun(cl);
+#endif
 
   cube* c = cl->begin;
 
   int i = 0;
   while (c != NULL) {
+#ifdef DEBUG
     printf("  %d:", i);
+#endif
     cube* next = c->next;
     del_cube(c, cl->var_count);
     c = next;
@@ -241,9 +247,6 @@ bfun* readFile(char* filename) {
 }
 
 void print_bfun(bfun* foo) {
-  //printf("%p (%d cubes of %d vars, %p to %p)\n", 
-      //foo, foo->cube_count, foo->var_count, foo->begin, foo->end);
-  
   printf("  %p: ", foo);
   cube* cursor = foo->begin;
   while (cursor != NULL) {
