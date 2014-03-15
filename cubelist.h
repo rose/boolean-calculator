@@ -19,12 +19,17 @@ typedef struct cube_list_t {
 
 typedef cube_list bfun; // use for non list specific functions
 
+void* Malloc(int size);
+
 // cube functions
 cube* new_cube(int vars);
-void del_cube(cube* c);
+void del_cube(cube* c, int vars);
+cube* copy(cube* c);
 void remove_var (cube* c, int var);
+void insert_var (cube* c, int var);
 void set_false (cube* c, int var);
 void set_true (cube* c, int var);
+void set_dc (cube* c, int var);
 bool all_dc (cube* c, int var_count);
 void print_cube(cube* c, int var_count);
 
@@ -38,6 +43,7 @@ bool same_cube(cube* c1, cube* c2, int var_count);
 // bfun functions
 bfun* new_bfun(int vars);
 void del_bfun(bfun* b);
+void del_bfun_leave_cubes(bfun* b);
 void add_term(bfun* foo, cube* c);
 bfun* invert_cube(cube* c, int var_count);
 bfun* readFile(char* filename);

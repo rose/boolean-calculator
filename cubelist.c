@@ -1,4 +1,16 @@
+#include <string.h>
+
 #include "cubelist.h"
+
+
+void* Malloc(int size) {
+  void* foo = malloc(size);
+  if (foo == NULL) {
+    printf("Unable to allocate %d bytes of memory!  Crashing now.\n");
+    exit(2);
+  }
+  return foo;
+}
 
 
 // cube functions
@@ -12,12 +24,23 @@ cube* new_cube(int vars) {
   }
   c->dc_count = vars;
   c->next = NULL;
+
   return c;
 }
 
-void del_cube(cube* c) {
+void del_cube(cube* c, int vars) {
+  printf("  deleting cube %p ", c);
+  print_cube(c, vars);
+  printf("\n");
   free(c->values);
   free(c);
+}
+
+cube* copy(cube* c) {
+  cube* new_c = Malloc(sizeof(cube));
+  memcpy(new_c, c, sizeof(cube));
+  new_c->next = NULL;
+  return new_c;
 }
 
 void remove_var (cube* c, int var) {
@@ -41,18 +64,35 @@ void set_true (cube* c, int var) {
   c->values[var] = t;
 }
 
+void insert_var (cube* c, int var) {
+  if (var < 0) {
+    set_false(c, var * -1);
+  } else {
+    set_true(c, var);
+  }
+}
+
+void set_dc (cube* c, int var) {
+  if (c->values[var] != dc) {
+    c->dc_count++;
+  }
+  c->values[var] = dc;
+}
+
 bool all_dc (cube* c, int var_count) {
   return c->dc_count == var_count;
 }
 
 void print_cube(cube* c, int var_count) {
-  printf("  cube at %p has %d dc variables\n    ", c, c->dc_count);
+  // printf("  cube at %p has %d dc variables\n    ", c, c->dc_count);
 
+  printf("[");
   for (int i = 0; i <= var_count; i++) {
     printf("%d ", (int) c->values[i]);
   }
+  printf("] ");
 
-  printf("\n");
+  // printf("\n");
 }
 
 
@@ -64,16 +104,23 @@ cube_list* new_cube_list(int var_count) {
   cl->end = NULL;
   cl->cube_count = 0;
   cl->var_count = var_count;
+
   return cl;
 }
 
 void del_cube_list(cube_list* cl) {
+  printf("Deleting cube_list at %p\n", cl);
+  print_bfun(cl);
+
   cube* c = cl->begin;
 
+  int i = 0;
   while (c != NULL) {
+    printf("  %d:", i);
     cube* next = c->next;
-    del_cube(c);
+    del_cube(c, cl->var_count);
     c = next;
+    i++;
   }
 
   free(cl);
@@ -90,6 +137,7 @@ void add_cube(cube_list* cl, cube* c) {
   cl->end->next = c;
   cl->end = c;
 }
+
 
 void add_cube_no_dup(cube_list* cl, cube* c) {
   for (cube* this = cl->begin; this != NULL; this = this->next) {
@@ -129,11 +177,11 @@ bfun* invert_cube(cube* c, int var_count) { // yuck
     if (c->values[i] == t) {
       cube* bar = new_cube(var_count);
       set_false(bar, i);
-      // add_term(foo, bar);
+      add_cube(foo, bar);
     } else if (c->values[i] == f) {
       cube* bar = new_cube(var_count);
       set_true(bar, i);
-      // add_term(foo, bar);
+      add_cube(foo, bar);
     }
   }
   return foo;
@@ -190,13 +238,18 @@ bfun* readFile(char* filename) {
 }
 
 void print_bfun(bfun* foo) {
-  printf("bfun:\n  start: %p\n  end: %p\n", foo->begin, foo->end);
-  printf("  cube_count: %d\n  var_count: %d\n", foo->cube_count, foo->var_count);
+  //printf("%p (%d cubes of %d vars, %p to %p)\n", 
+      //foo, foo->cube_count, foo->var_count, foo->begin, foo->end);
   
+  printf("  %p: ", foo);
   cube* cursor = foo->begin;
   while (cursor != NULL) {
     print_cube(cursor, foo->var_count);
     cursor = cursor->next;
   }
+  printf("\n");
 }
 
+void del_bfun_leave_cubes(bfun* b) {
+  // for now bfuns are just cube_lists, so there's nothing to do here
+}
