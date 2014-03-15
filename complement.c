@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
   printf("\nResult is:\n");
   print_bfun(result);
 
+  del_bfun(test1);
   del_bfun(result);
   /*
   del_cube(plain, vs);
@@ -72,6 +73,8 @@ int main(int argc, char* argv[]) {
 
 
 bfun* complement (bfun* b_initial) {
+  // does not free argument.  
+
   printf("Complement %p\n", b_initial);
   print_bfun(b_initial);
 
@@ -206,7 +209,6 @@ bfun* try_simplify(bfun* b) {
   }
 
   if (result == NULL) return b;
-  del_bfun(b);
   return result;
 }
 

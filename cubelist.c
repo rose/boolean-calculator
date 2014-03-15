@@ -87,7 +87,7 @@ void print_cube(cube* c, int var_count) {
   // printf("  cube at %p has %d dc variables\n    ", c, c->dc_count);
 
   printf("[");
-  for (int i = 0; i <= var_count; i++) {
+  for (int i = 1; i <= var_count; i++) {
     printf("%d ", (int) c->values[i]);
   }
   printf("] ");
