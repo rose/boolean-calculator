@@ -1,17 +1,16 @@
 #include "parser.h"
 
 int main() {
-  run_file("BooleanCalculatorEngine/cmd4.txt");
+  parse();
 }
 
-void run_file(char* filename) {
-  FILE* fp = fopen(filename, "r");
+void parse() {
   char c;
   int dest, op, op2;
-  fscanf(fp, "%c", &c);
+  scanf("%c", &c);
 
   while (c != 'q') {
-    fscanf(fp, "%d", &dest);
+    scanf("%d", &dest);
 
     switch (c) {
       case 'r':
@@ -19,25 +18,25 @@ void run_file(char* filename) {
       case 'p':
         do_write(dest); break;
       case '!':
-        fscanf(fp, "%d", &op);
+        scanf("%d", &op);
         do_not(dest, op); break;
       case '+':
-        fscanf(fp, "%d", &op);
-        fscanf(fp, "%d", &op2);
+        scanf("%d", &op);
+        scanf("%d", &op2);
         do_or(dest, op, op2); break;
       case '&':
-        fscanf(fp, "%d", &op);
-        fscanf(fp, "%d", &op2);
+        scanf("%d", &op);
+        scanf("%d", &op2);
         do_and(dest, op, op2); break;
       default:
         printf("Unknown command %c, dying now!\n", c);
+        do_quit();
         exit(2);
     }
 
-    fscanf(fp, "%c", &c); // consume new line after args
-    fscanf(fp, "%c", &c);
+    scanf("%c", &c); // consume new line after args
+    scanf("%c", &c);
 
-    do_quit();
   }
 }
 

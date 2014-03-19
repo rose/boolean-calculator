@@ -3,7 +3,7 @@
 #include "utils.h"
 #include "bfun.h"
 
-void run_file(char* filename);
+void parse();
 void do_quit();
 void do_and(int dest, int m, int n);
 void do_or(int dest, int m, int n);
