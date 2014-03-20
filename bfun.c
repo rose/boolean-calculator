@@ -90,23 +90,6 @@ bool has_all_dc(bfun* b) {
 }
 
 
-cube_list* negate_cube(cube* c, int var_count) {
-  cube_list* result = new_cube_list(var_count);
-
-  for (int i = 1; i <= var_count; i++) {
-    val value = c->values[i];
-    cube* cn = NULL;
-
-    if (value == t || value == f) cn = new_cube(var_count);
-    if      (value == t)  set_false(cn, i);
-    else if (value == f)   set_true(cn, i);
-    if(cn) add_cube(result, cn);
-  }
-
-  return result;
-}
-
-
 bfun* complement_simplify(bfun* b) {
   bfun* result = NULL;
 
@@ -229,4 +212,116 @@ int best_split(bfun* b) {
   return best_index;
 }
 
+// bfun functions
+
+bfun* new_bfun(int vars) {
+  return (bfun*)new_cube_list(vars);
+}
+
+void del_bfun(bfun* b) {
+  del_cube_list((cube_list*) b);
+}
+
+bfun* invert_cube(cube* c, int var_count) { // yuck
+  bfun* foo = new_bfun(var_count);
+  for (int i = 0; i < var_count; i++) {
+    if (c->values[i] == t) {
+      cube* bar = new_cube(var_count);
+      set_false(bar, i);
+      add_cube(foo, bar);
+    } else if (c->values[i] == f) {
+      cube* bar = new_cube(var_count);
+      set_true(bar, i);
+      add_cube(foo, bar);
+    }
+  }
+  return foo;
+}
+
+bfun* read_file(char* filename) {
+  FILE *fp = fopen(filename, "r");
+  if (fp == NULL) {
+    printf("Error opening file %s\n", filename);
+    exit(1);
+  }
+
+  int var_count = 0;
+  int cube_count = 0;
+
+  fscanf(fp, "%d", &var_count);
+  fscanf(fp, "%d", &cube_count);
+
+  cube_list* cl = new_cube_list(var_count);
+
+  int vars_not_dc;
+  int var;
+  val value;
+
+  for (int i = 0; i < cube_count; i++) {
+
+# ifdef DEBUG
+    printf("Reading line %d... ", i);
+#endif
+
+    fscanf(fp, "%d", &vars_not_dc); 
+    cube* c = new_cube(var_count);
+
+# ifdef DEBUG
+    printf("creating cube...\n");
+#endif
+
+    for (int j = 0; j < vars_not_dc; j++) {
+      fscanf(fp, "%d", &var);
+      if (var > 0) {
+        set_true (c, var);
+      } else {
+        set_false (c, var * -1);
+      }
+    }
+
+    add_cube(cl, c);
+
+# ifdef DEBUG
+    print_cube(c, var_count);
+    if (c->dc_count != var_count - vars_not_dc) {
+      printf("Error reading cube %d in file %s!\n", i, filename);
+    }
+#endif 
+  }
+
+  fclose(fp);
+  return (bfun*) cl;
+}
+
+
+void write_file(char* name, bfun* b) {
+  FILE *fp = fopen(name, "w");
+
+  fprintf(fp, "%d\n%d\n", b->var_count, b->cube_count);
+  for (cube* c = b->begin; c != NULL; c = c->next) {
+    fprintf(fp, "%d ", b->var_count - c->dc_count);
+    for (int i = 1; i <= b->var_count; i++) {
+      switch (c->values[i]) {
+        case t:
+          fprintf(fp, "%d ", i);
+          break;
+        case f:
+          fprintf(fp, "-%d ", i);
+          break;
+      }
+    }
+    fprintf(fp, "\n");
+  }
+}
+
+
+void print_bfun(bfun* foo) {
+  printf("  %p: ", foo);
+  cube* cursor = foo->begin;
+  while (cursor != NULL) {
+    print_cube(cursor, foo->var_count);
+    cursor = cursor->next;
+  }
+  printf("\n");
+}
 
