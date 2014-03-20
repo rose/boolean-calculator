@@ -4,7 +4,7 @@
 void* Malloc(int size) {
   void* foo = malloc(size);
   if (foo == NULL) {
-    printf("Unable to allocate %d bytes of memory!  Crashing now.\n");
+    printf("Unable to allocate %d bytes of memory!  Crashing now.\n", size);
     exit(2);
   }
   return foo;
