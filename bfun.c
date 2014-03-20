@@ -3,8 +3,8 @@
 bfun* complement (bfun* b_initial) {
   // does not free argument.  
 
-  bfun* b = complement_simplify(b_initial);
-  if (b_initial != b) {
+  bfun* b;
+  if (!(b = complement_simplify(b_initial))) {
     return b;
   } else {
     int x = best_split(b);
@@ -119,7 +119,6 @@ bfun* complement_simplify(bfun* b) {
     result = negate_cube(b->begin, b->var_count);
   }
 
-  if (result == NULL) return b;
   return result;
 }
 
