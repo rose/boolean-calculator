@@ -32,7 +32,7 @@ bfun* complement (bfun* b_initial) {
 }
 
 
-bfun* pos_co (bfun* b, int v) {
+bfun* pos_co (bfun* b, int var) {
   // reuse cubes?  No, because future splits may be on different variables
   // using no_dup makes the runtime quadratic!  But may substantially reduce
   // the number of cubes in each sublist.  TODO time this
@@ -59,7 +59,7 @@ bfun* pos_co (bfun* b, int v) {
 }
 
 
-bfun* neg_co (bfun* b, int v) {
+bfun* neg_co (bfun* b, int var) {
   bfun* result = new_bfun(b->var_count);
 
   for (cube* c = b->begin; c != NULL; c = c->next) {

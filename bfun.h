@@ -23,8 +23,8 @@ bfun* and(bfun* b, bfun* g);
 // bfun*s & variables
 void and_var(bfun* b, int var);
 int best_split(bfun* b);
-bfun* pos_co(bfun* b, int x);
-bfun* neg_co(bfun* b, int x);
+bfun* pos_co(bfun* b, int var);
+bfun* neg_co(bfun* b, int var);
 
 #endif // _BFUN_H
 
