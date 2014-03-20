@@ -7,27 +7,27 @@ bfun* complement (bfun* b_initial) {
   if (!(b = complement_simplify(b_initial))) {
     return b;
   } else {
-    int x = best_split(b);
+    int split_var = best_split(b);
 
-    bfun* pc = pos_cofactor(b,x);
-    bfun* nc = neg_cofactor(b,x);
+    bfun* p_co = pos_cofactor(b,split_var);
+    bfun* n_co = neg_cofactor(b,split_var);
 
-    bfun* p = complement(pc);
-    bfun* n = complement(nc);
+    bfun* inv_p = complement(p_co);
+    bfun* inv_n = complement(n_co);
 
-    del_bfun(pc);
-    del_bfun(nc);
+    del_bfun(p_co);
+    del_bfun(n_co);
 
     // and_var modifies the passed cube_list
-    and_var(p, x);
-    and_var(n, -x);
+    and_var(inv_p,  split_var);
+    and_var(inv_n, -split_var);
 
     // or allocates a new cube & copies the cubelists over
-    bfun* result = or(p,n);
-    del_bfun(p);
-    del_bfun(n);
+    bfun* inv = or(inv_p,inv_n);
+    del_bfun(inv_p);
+    del_bfun(inv_n);
     
-    return result;
+    return inv;
   }
 }
 
