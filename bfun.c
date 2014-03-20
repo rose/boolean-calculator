@@ -9,30 +9,30 @@ bfun* complement (bfun* b_initial) {
   } else {
     int split_var = best_split(b);
 
-    bfun* p_co = pos_cofactor(b,split_var);
-    bfun* n_co = neg_cofactor(b,split_var);
+    bfun* t_co = cofactor(b,split_var,t);
+    bfun* f_co = cofactor(b,split_var,f);
 
-    bfun* inv_p = complement(p_co);
-    bfun* inv_n = complement(n_co);
+    bfun* inv_t = complement(t_co);
+    bfun* inv_f = complement(f_co);
 
-    del_bfun(p_co);
-    del_bfun(n_co);
+    del_bfun(t_co);
+    del_bfun(f_co);
 
     // and_var modifies the passed cube_list
-    and_var(inv_p,  split_var);
-    and_var(inv_n, -split_var);
+    and_var(inv_t,  split_var);
+    and_var(inv_f, -split_var);
 
     // or allocates a new cube & copies the cubelists over
-    bfun* inv = or(inv_p,inv_n);
-    del_bfun(inv_p);
-    del_bfun(inv_n);
+    bfun* inv = or(inv_t,inv_f);
+    del_bfun(inv_t);
+    del_bfun(inv_f);
     
     return inv;
   }
 }
 
 
-bfun* pos_cofactor (bfun* b, int var) {
+bfun* cofactor (bfun* b, int var, val side) {
   // reuse cubes?  No, because future splits may be on different variables
   // using no_dup makes the runtime quadratic!  But may substantially reduce
   // the number of cubes in each sublist.  TODO time this
@@ -42,45 +42,18 @@ bfun* pos_cofactor (bfun* b, int var) {
   for (cube* c = b->begin; c != NULL; c = c->next) {
     cube* co_cube = NULL;
 
-    switch (c->values[var]) {
-      case dc:
+    if(c->values[var] == dc) {
         co_cube = copy(c, b->var_count);
         add_cube_no_dup(result, co_cube);
-        break;
-      case t:
+    } else if(c->values[var] == side) {
         co_cube = copy(c, b->var_count);
         set_dc(co_cube, var);
         add_cube_no_dup(result, co_cube);
-        break;
     }
   }
 
   return result;
 }
-
-
-bfun* neg_cofactor (bfun* b, int var) {
-  bfun* result = new_bfun(b->var_count);
-
-  for (cube* c = b->begin; c != NULL; c = c->next) {
-    cube* co_cube = NULL;
-
-    switch (c->values[var]) {
-      case dc:
-        co_cube = copy(c, b->var_count);
-        add_cube_no_dup(result, co_cube);
-        break;
-      case f:
-        co_cube = copy(c, b->var_count);
-        set_dc(co_cube, var);
-        add_cube_no_dup(result, co_cube);
-        break;
-    }
-  }
-  
-  return result;
-}
-
 
 bool has_all_dc(bfun* b) {
   for (cube* c = b->begin; c != NULL; c = c->next) {

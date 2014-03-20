@@ -23,9 +23,8 @@ bfun* and(bfun* b, bfun* g);
 // bfun*s & variables
 void and_var(bfun* b, int var);
 int best_split(bfun* b);
-// pos_cofactor and neg_cofactor allocate and return new bfuns
-bfun* pos_cofactor(bfun* b, int var);
-bfun* neg_cofactor(bfun* b, int var);
+// cofactor allocates and returns new bfun
+bfun* cofactor(bfun* b, int var, val side);
 
 // bfun functions
 bfun* new_bfun(int vars);
