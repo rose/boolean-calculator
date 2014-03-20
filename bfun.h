@@ -12,7 +12,7 @@
 
 // single bfun* functions
 bfun* complement(bfun* b);
-bfun* try_simplify(bfun* b);
+bfun* complement_simplify(bfun* b);
 bool has_all_dc(bfun* b);
 
 // combining bfun*s

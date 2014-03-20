@@ -3,7 +3,7 @@
 bfun* complement (bfun* b_initial) {
   // does not free argument.  
 
-  bfun* b = try_simplify(b_initial);
+  bfun* b = complement_simplify(b_initial);
   if (b_initial != b) {
     return b;
   } else {
@@ -111,7 +111,7 @@ cube_list* negate_cube(cube* c, int var) {
 }
 
 
-bfun* try_simplify(bfun* b) {
+bfun* complement_simplify(bfun* b) {
   bfun* result = NULL;
 
   if (b->cube_count == 0) { // empty cubelist is never true -> change to true bfun
