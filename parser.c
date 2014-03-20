@@ -31,11 +31,11 @@ void parse() {
         do_not(dest, op); break;
       case '+':
         scanint("%d", &op);
-        scanint("%d", &op2);
+        scanint(" %d", &op2);
         do_or(dest, op, op2); break;
       case '&':
         scanint("%d", &op);
-        scanint("%d", &op2);
+        scanint(" %d", &op2);
         do_and(dest, op, op2); break;
       default:
         printf("Unknown command %c, dying now!\n", c);
@@ -51,9 +51,10 @@ void parse() {
 }
 
 
-void scanint(char* str, int* n) {
-  check_bounds(*n);
-  scanf(str, n);
+void scanint(char* str, int* n_ptr) {
+  // printf("entering scanint with n_ptr = %p, n = %d, str = %s\n", n_ptr, *n_ptr, str);
+  scanf(str, n_ptr);
+  check_bounds(*n_ptr);
 }
 
 
@@ -70,7 +71,7 @@ void alloc_functions() {
 
 void maybe_free(int n) {
   if (functions[n] != NULL) {
-    printf("Overwriting function %d!\n", n);
+    printf("Deleting function %d\n", n);
     del_bfun(functions[n]);
     functions[n] = NULL;
   }
@@ -88,7 +89,7 @@ void free_functions() {
 void check_bounds(int n) {
   if (n < 0 || n >= MAX_FUNCTIONS) {
     printf("Cannot access function %d.  Function must be between 0 and %d.\n", n, MAX_FUNCTIONS - 1);
-    printf("Crashing now.");
+    printf("Crashing now.\n");
     free_functions();
     exit(2);
   }
