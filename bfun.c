@@ -95,13 +95,13 @@ bfun* or(bfun* b, bfun* g) {
 
 
 bfun* and(bfun* b, bfun* g) {
-  bfun* m_not = complement(b);
-  bfun* n_not = complement(g);
-  bfun* mn_or = or(m_not, n_not);
-  bfun* to_return = complement(mn_or);
-  del_bfun(m_not);
-  del_bfun(n_not);
-  del_bfun(mn_or);
+  bfun* b_not = complement(b);
+  bfun* g_not = complement(g);
+  bfun* bg_or = or(b_not, g_not);
+  bfun* to_return = complement(bg_or);
+  del_bfun(b_not);
+  del_bfun(g_not);
+  del_bfun(bg_or);
   return to_return;
 }
 
