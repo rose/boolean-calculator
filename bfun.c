@@ -171,20 +171,16 @@ bool var_stats(bfun* b, int* count, int* diff, int* is_binate) {
   // yuck
   for(cube* c = b->begin; c != NULL; c = c->next) {
     for (int i = 1; i <= b->var_count; i++) {
-      if (c->values[i] == t) {
+      int sign;
+      if      (c->values[i] == t) sign =  1;
+      else if (c->values[i] == f) sign = -1;
+      if(diff[i] * sign < 0) {
+        is_binate[i] = true;
+        found_binate = true;
+      }
+      if (c->values[i] == t || c->values[i] == f) {
         count[i]++;
-        if (diff[i] < 0) {
-          is_binate[i] = true;
-          found_binate = true;
-        }
-        diff[i] ++;
-      } else if (c->values[i] == f) {
-        count[i]++;
-        if (diff[i] > 0) {
-          is_binate[i] = true;
-          found_binate = true;
-        }
-        diff[i]--;
+        diff[i]+=sign;
       }
       
     }
