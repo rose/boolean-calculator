@@ -3,14 +3,10 @@
 bfun* complement (bfun* b_initial) {
   // does not free argument.  
 
-  printf("Complement", b_initial);
-  print_bfun(b_initial);
-
   bfun* b = try_simplify(b_initial);
   if (b_initial != b) {
     return b;
   } else {
-    printf("Recursing...\n");
     int x = best_split(b);
 
     bfun* pc = pos_co(b,x);
@@ -23,14 +19,11 @@ bfun* complement (bfun* b_initial) {
     del_bfun(nc);
 
     // and_var modifies the passed cube_list
-    printf("Merging cofactors on %d\n", x);
     and_var(p, x);
     and_var(n, x * -1);
 
     // or allocates a new cube & copies the cubelists over
     bfun* result = or(p,n);
-    printf("Complement returning merged:");
-    print_bfun(result);
     del_bfun(p);
     del_bfun(n);
     
@@ -43,9 +36,6 @@ bfun* pos_co (bfun* b, int v) {
   // reuse cubes?  No, because future splits may be on different variables
   // using no_dup makes the runtime quadratic!  But may substantially reduce
   // the number of cubes in each sublist.  TODO time this
-
-  printf("Positive cofactor on %d of ", v);
-  print_bfun(b);
 
   bfun* result = new_bfun(b->var_count);
 
@@ -65,18 +55,12 @@ bfun* pos_co (bfun* b, int v) {
     }
   }
 
-  printf("  is");
-  print_bfun(result);
-
   return result;
 }
 
 
 bfun* neg_co (bfun* b, int v) {
   bfun* result = new_bfun(b->var_count);
-
-  printf("Negative cofactor on %d of ", v);
-  print_bfun(b);
 
   for (cube* c = b->begin; c != NULL; c = c->next) {
     cube* co_cube = NULL;
@@ -94,9 +78,6 @@ bfun* neg_co (bfun* b, int v) {
     }
   }
   
-  printf("  is");
-  print_bfun(result);
-
   return result;
 }
 
@@ -134,18 +115,12 @@ bfun* try_simplify(bfun* b) {
   bfun* result = NULL;
 
   if (b->cube_count == 0) { // empty cubelist is never true -> change to true bfun
-    printf("Base case - empty cube list returns true:");
     result = new_cube_list(b->var_count);
     add_cube(result, new_cube(b->var_count));
-    print_bfun(result);
   } else if (has_all_dc(b)) { // always true -> change to empty (false) bfun
-    printf("Base case - true cube list returns empty:");
     result = new_cube_list(b->var_count); 
-    print_bfun(result);
   } else if (b->cube_count == 1) { // just one cube -> negate manually
-    printf("Base case - single cube:");
     result = negate_cube(b->begin, b->var_count);
-    print_bfun(result);
   }
 
   if (result == NULL) return b;
