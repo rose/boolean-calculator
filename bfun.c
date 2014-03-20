@@ -168,6 +168,18 @@ bfun* or(bfun* b, bfun* g) {
 }
 
 
+bfun* and(bfun* b, bfun* g) {
+  bfun* m_not = complement(b);
+  bfun* n_not = complement(g);
+  bfun* mn_or = or(m_not, n_not);
+  bfun* to_return = complement(mn_or);
+  del_bfun(m_not);
+  del_bfun(n_not);
+  del_bfun(mn_or);
+  return to_return;
+}
+
+
 void append_cubes(bfun* b, bfun* g) {
   for (cube* c = g->begin; c != NULL; c = c->next) {
     add_cube(b, copy(c, b->var_count));

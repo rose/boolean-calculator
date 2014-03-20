@@ -1,4 +1,6 @@
 #include "bfun.h"
+#include "parser.h"
+
 
 void test_bfun(char* filename);
 
@@ -11,8 +13,12 @@ int main(int argc, char* argv[]) {
     exit(2);
   }
   test_bfun(filename);
+
+#else
+  parse();
 #endif
 }
+
 
 void test_bfun(char* filename) {
   char* out_file = "out.txt";

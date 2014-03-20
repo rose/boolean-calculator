@@ -18,6 +18,7 @@ bool has_all_dc(bfun* b);
 // combining bfun*s
 void append_cubes(bfun* b, bfun* g);
 bfun* or(bfun* b, bfun* g);
+bfun* and(bfun* b, bfun* g);
 
 // bfun*s & variables
 void and_var(bfun* b, int var);
