@@ -42,14 +42,14 @@ bfun* pos_cofactor (bfun* b, int var) {
   for (cube* c = b->begin; c != NULL; c = c->next) {
     cube* co_cube = NULL;
 
-    switch (c->values[v]) {
+    switch (c->values[var]) {
       case dc:
         co_cube = copy(c, b->var_count);
         add_cube_no_dup(result, co_cube);
         break;
       case t:
         co_cube = copy(c, b->var_count);
-        set_dc(co_cube, v);
+        set_dc(co_cube, var);
         add_cube_no_dup(result, co_cube);
         break;
     }
@@ -65,14 +65,14 @@ bfun* neg_cofactor (bfun* b, int var) {
   for (cube* c = b->begin; c != NULL; c = c->next) {
     cube* co_cube = NULL;
 
-    switch (c->values[v]) {
+    switch (c->values[var]) {
       case dc:
         co_cube = copy(c, b->var_count);
         add_cube_no_dup(result, co_cube);
         break;
       case f:
         co_cube = copy(c, b->var_count);
-        set_dc(co_cube, v);
+        set_dc(co_cube, var);
         add_cube_no_dup(result, co_cube);
         break;
     }
@@ -93,11 +93,11 @@ bool has_all_dc(bfun* b) {
 cube_list* negate_cube(cube* c, int var_count) {
   cube_list* result = new_cube_list(var_count);
 
-  for (int i = 1; i <= var; i++) {
+  for (int i = 1; i <= var_count; i++) {
     val value = c->values[i];
     cube* cn = NULL;
 
-    if (value == t || value == f) cn = new_cube(var);
+    if (value == t || value == f) cn = new_cube(var_count);
     if      (value == t)  set_false(cn, i);
     else if (value == f)   set_true(cn, i);
     if(cn) add_cube(result, cn);
