@@ -90,8 +90,8 @@ bool has_all_dc(bfun* b) {
 }
 
 
-cube_list* negate_cube(cube* c, int var) {
-  cube_list* result = new_cube_list(var);
+cube_list* negate_cube(cube* c, int var_count) {
+  cube_list* result = new_cube_list(var_count);
 
   for (int i = 1; i <= var; i++) {
     val value = c->values[i];
