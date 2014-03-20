@@ -20,7 +20,7 @@ bfun* complement (bfun* b_initial) {
 
     // and_var modifies the passed cube_list
     and_var(p, x);
-    and_var(n, x * -1);
+    and_var(n, -x);
 
     // or allocates a new cube & copies the cubelists over
     bfun* result = or(p,n);
