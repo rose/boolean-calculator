@@ -26,10 +26,10 @@ void test_bfun(char* filename) {
   int vs = 4;
 
   cube* one_true = new_cube(vs);
-  set_true(one_true, 1);
+  set_val(one_true, 1, t);
   cube* one_each = new_cube(vs);
-  set_false(one_each, 1);
-  set_true(one_each, 2);
+  set_val(one_each, 1, f);
+  set_val(one_each, 2, t);
 
   cube_list* test1 = new_cube_list(vs);
   add_cube(test1, one_each);

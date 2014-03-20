@@ -231,9 +231,9 @@ bfun* read_file(char* filename) {
     for (int j = 0; j < vars_not_dc; j++) {
       fscanf(fp, "%d", &var);
       if (var > 0) {
-        set_true (c, var);
+        set_val (c,  var, t);
       } else {
-        set_false (c, var * -1);
+        set_val (c, -var, f);
       }
     }
 

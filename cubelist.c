@@ -72,10 +72,11 @@ cube_list* negate_cube(cube* c, int var_count) {
     val value = c->values[i];
     cube* cn = NULL;
 
-    if (value == t || value == f) cn = new_cube(var_count);
-    if      (value == t)  set_false(cn, i);
-    else if (value == f)   set_true(cn, i);
-    if(cn) add_cube(result, cn);
+    if (value == t || value == f) {
+      cn = new_cube(var_count);
+      set_val(cn, i, value);
+      add_cube(result, cn);
+    }
   }
 
   return result;
