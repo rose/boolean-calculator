@@ -31,7 +31,6 @@ bfun* new_bfun(int vars);
 void del_bfun(bfun* b);
 void del_bfun_leave_cubes(bfun* b);
 void add_term(bfun* foo, cube* c);
-bfun* invert_cube(cube* c, int var_count);
 bfun* read_file(char* filename);
 void write_file(char* out_file, bfun* b);
 void print_bfun(bfun* foo);

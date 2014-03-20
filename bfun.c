@@ -195,21 +195,6 @@ void del_bfun(bfun* b) {
   del_cube_list((cube_list*) b);
 }
 
-bfun* invert_cube(cube* c, int var_count) { // yuck
-  bfun* foo = new_bfun(var_count);
-  for (int i = 0; i < var_count; i++) {
-    if (c->values[i] == t) {
-      cube* bar = new_cube(var_count);
-      set_false(bar, i);
-      add_cube(foo, bar);
-    } else if (c->values[i] == f) {
-      cube* bar = new_cube(var_count);
-      set_true(bar, i);
-      add_cube(foo, bar);
-    }
-  }
-  return foo;
-}
 
 bfun* read_file(char* filename) {
   FILE *fp = fopen(filename, "r");
