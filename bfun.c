@@ -3,36 +3,36 @@
 bfun* complement (bfun* b_initial) {
   // does not free argument.  
 
-  bfun* b = try_simplify(b_initial);
-  if (b_initial != b) {
+  bfun* b;
+  if (!(b = complement_simplify(b_initial))) {
     return b;
   } else {
-    int x = best_split(b);
+    int split_var = best_split(b);
 
-    bfun* pc = pos_co(b,x);
-    bfun* nc = neg_co(b,x);
+    bfun* t_co = cofactor(b,split_var,t);
+    bfun* f_co = cofactor(b,split_var,f);
 
-    bfun* p = complement(pc);
-    bfun* n = complement(nc);
+    bfun* inv_t = complement(t_co);
+    bfun* inv_f = complement(f_co);
 
-    del_bfun(pc);
-    del_bfun(nc);
+    del_bfun(t_co);
+    del_bfun(f_co);
 
     // and_var modifies the passed cube_list
-    and_var(p, x);
-    and_var(n, x * -1);
+    and_var(inv_t,  split_var);
+    and_var(inv_f, -split_var);
 
     // or allocates a new cube & copies the cubelists over
-    bfun* result = or(p,n);
-    del_bfun(p);
-    del_bfun(n);
+    bfun* inv = or(inv_t,inv_f);
+    del_bfun(inv_t);
+    del_bfun(inv_f);
     
-    return result;
+    return inv;
   }
 }
 
 
-bfun* pos_co (bfun* b, int v) {
+bfun* cofactor (bfun* b, int var, val side) {
   // reuse cubes?  No, because future splits may be on different variables
   // using no_dup makes the runtime quadratic!  But may substantially reduce
   // the number of cubes in each sublist.  TODO time this
@@ -42,45 +42,18 @@ bfun* pos_co (bfun* b, int v) {
   for (cube* c = b->begin; c != NULL; c = c->next) {
     cube* co_cube = NULL;
 
-    switch (c->values[v]) {
-      case dc:
+    if(c->values[var] == dc) {
         co_cube = copy(c, b->var_count);
         add_cube_no_dup(result, co_cube);
-        break;
-      case t:
+    } else if(c->values[var] == side) {
         co_cube = copy(c, b->var_count);
-        set_dc(co_cube, v);
+        set_dc(co_cube, var);
         add_cube_no_dup(result, co_cube);
-        break;
     }
   }
 
   return result;
 }
-
-
-bfun* neg_co (bfun* b, int v) {
-  bfun* result = new_bfun(b->var_count);
-
-  for (cube* c = b->begin; c != NULL; c = c->next) {
-    cube* co_cube = NULL;
-
-    switch (c->values[v]) {
-      case dc:
-        co_cube = copy(c, b->var_count);
-        add_cube_no_dup(result, co_cube);
-        break;
-      case f:
-        co_cube = copy(c, b->var_count);
-        set_dc(co_cube, v);
-        add_cube_no_dup(result, co_cube);
-        break;
-    }
-  }
-  
-  return result;
-}
-
 
 bool has_all_dc(bfun* b) {
   for (cube* c = b->begin; c != NULL; c = c->next) {
@@ -90,28 +63,7 @@ bool has_all_dc(bfun* b) {
 }
 
 
-cube_list* negate_cube(cube* c, int var) {
-  cube_list* result = new_cube_list(var);
-
-  for (int i = 1; i <= var; i++) {
-    val value = c->values[i];
-
-    if (value == t) {
-      cube* cn = new_cube(var);
-      set_false(cn, i);
-      add_cube(result, cn);
-    } else if (value == f) {
-      cube* cn = new_cube(var);
-      set_true(cn, i);
-      add_cube(result, cn);
-    }
-  }
-
-  return result;
-}
-
-
-bfun* try_simplify(bfun* b) {
+bfun* complement_simplify(bfun* b) {
   bfun* result = NULL;
 
   if (b->cube_count == 0) { // empty cubelist is never true -> change to true bfun
@@ -123,7 +75,6 @@ bfun* try_simplify(bfun* b) {
     result = negate_cube(b->begin, b->var_count);
   }
 
-  if (result == NULL) return b;
   return result;
 }
 
@@ -144,13 +95,13 @@ bfun* or(bfun* b, bfun* g) {
 
 
 bfun* and(bfun* b, bfun* g) {
-  bfun* m_not = complement(b);
-  bfun* n_not = complement(g);
-  bfun* mn_or = or(m_not, n_not);
-  bfun* to_return = complement(mn_or);
-  del_bfun(m_not);
-  del_bfun(n_not);
-  del_bfun(mn_or);
+  bfun* b_not = complement(b);
+  bfun* g_not = complement(g);
+  bfun* bg_or = or(b_not, g_not);
+  bfun* to_return = complement(bg_or);
+  del_bfun(b_not);
+  del_bfun(g_not);
+  del_bfun(bg_or);
   return to_return;
 }
 
@@ -176,20 +127,16 @@ bool var_stats(bfun* b, int* count, int* diff, int* is_binate) {
   // yuck
   for(cube* c = b->begin; c != NULL; c = c->next) {
     for (int i = 1; i <= b->var_count; i++) {
-      if (c->values[i] == t) {
+      int sign, value_i = c->values[i];
+      if      (value_i == t) sign =  1;
+      else if (value_i == f) sign = -1;
+      if(diff[i] * sign < 0) {
+        is_binate[i] = true;
+        found_binate = true;
+      }
+      if (value_i == t || value_i == f) {
         count[i]++;
-        if (diff[i] < 0) {
-          is_binate[i] = true;
-          found_binate = true;
-        }
-        diff[i] ++;
-      } else if (c->values[i] == f) {
-        count[i]++;
-        if (diff[i] > 0) {
-          is_binate[i] = true;
-          found_binate = true;
-        }
-        diff[i]--;
+        diff[i]+=sign;
       }
       
     }
@@ -238,4 +185,101 @@ int best_split(bfun* b) {
   return best_index;
 }
 
+// bfun functions
+
+bfun* new_bfun(int vars) {
+  return (bfun*)new_cube_list(vars);
+}
+
+void del_bfun(bfun* b) {
+  del_cube_list((cube_list*) b);
+}
+
+
+bfun* read_file(char* filename) {
+  FILE *fp = fopen(filename, "r");
+  if (fp == NULL) {
+    printf("Error opening file %s\n", filename);
+    exit(1);
+  }
+
+  int var_count = 0;
+  int cube_count = 0;
+
+  fscanf(fp, "%d", &var_count);
+  fscanf(fp, "%d", &cube_count);
+
+  cube_list* cl = new_cube_list(var_count);
+
+  int vars_not_dc;
+  int var;
+  val value;
+
+  for (int i = 0; i < cube_count; i++) {
+
+# ifdef DEBUG
+    printf("Reading line %d... ", i);
+#endif
+
+    fscanf(fp, "%d", &vars_not_dc); 
+    cube* c = new_cube(var_count);
+
+# ifdef DEBUG
+    printf("creating cube...\n");
+#endif
+
+    for (int j = 0; j < vars_not_dc; j++) {
+      fscanf(fp, "%d", &var);
+      if (var > 0) {
+        set_val (c,  var, t);
+      } else {
+        set_val (c, -var, f);
+      }
+    }
+
+    add_cube(cl, c);
+
+# ifdef DEBUG
+    print_cube(c, var_count);
+    if (c->dc_count != var_count - vars_not_dc) {
+      printf("Error reading cube %d in file %s!\n", i, filename);
+    }
+#endif 
+  }
+
+  fclose(fp);
+  return (bfun*) cl;
+}
+
+
+void write_file(char* name, bfun* b) {
+  FILE *fp = fopen(name, "w");
+
+  fprintf(fp, "%d\n%d\n", b->var_count, b->cube_count);
+  for (cube* c = b->begin; c != NULL; c = c->next) {
+    fprintf(fp, "%d ", b->var_count - c->dc_count);
+    for (int i = 1; i <= b->var_count; i++) {
+      switch (c->values[i]) {
+        case t:
+          fprintf(fp, "%d ", i);
+          break;
+        case f:
+          fprintf(fp, "-%d ", i);
+          break;
+      }
+    }
+    fprintf(fp, "\n");
+  }
+}
+
+
+void print_bfun(bfun* foo) {
+  printf("  %p: ", foo);
+  cube* cursor = foo->begin;
+  while (cursor != NULL) {
+    print_cube(cursor, foo->var_count);
+    cursor = cursor->next;
+  }
+  printf("\n");
+}
 
