@@ -6,7 +6,9 @@
 #include <stdbool.h>
 
 
-void* Malloc(int size);
+typedef enum {
+  bad, t, f, dc
+} val;
 
 
 #endif // _UTILS_H
