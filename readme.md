@@ -33,7 +33,7 @@ This will bring you into an interactive session.  A simple session might involve
 ```
 r 3
 ! 0 3
-w 0
+p 0
 q
 ```
 
